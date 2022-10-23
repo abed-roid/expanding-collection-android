@@ -1,5 +1,6 @@
 package com.ramotion.expandingcollection;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,9 +11,15 @@ import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
 import androidx.annotation.DrawableRes;
+
+import com.bumptech.glide.Glide;
+
+import java.lang.ref.WeakReference;
+import java.util.concurrent.ExecutionException;
 
 import io.alterac.blurkit.BlurKit;
 
@@ -21,16 +28,18 @@ import io.alterac.blurkit.BlurKit;
  */
 public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
 
-    private final Resources mResources;
+    private final WeakReference<Context> mContextReference;
     private final BackgroundBitmapCache cache;
-    private final int mProvidedBitmapResId;
+    private final Integer mProvidedBitmapResId;
+    private String imageUrl;
     private int downScale;
     private int blurRadius;
 
-    public BitmapWorkerTask(Resources resources, @DrawableRes int providedBitmapResId, int downScale, int blurRadius) {
-        this.mResources = resources;
+    public BitmapWorkerTask(Context context, @DrawableRes Integer providedBitmapResId, String imageUrl, int downScale, int blurRadius) {
+        this.mContextReference = new WeakReference<>(context);
         this.cache = BackgroundBitmapCache.getInstance();
         this.mProvidedBitmapResId = providedBitmapResId;
+        this.imageUrl = imageUrl;
         this.downScale = downScale;
         this.blurRadius = blurRadius;
     }
@@ -39,16 +48,27 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
     protected Bitmap doInBackground(Integer... params) {
         Integer key = params[0];
         Bitmap cachedBitmap = cache.getBitmapFromBgMemCache(key);
-        if (cachedBitmap == null) {
-            cachedBitmap = BitmapFactory.decodeResource(mResources, mProvidedBitmapResId, new BitmapFactoryOptions());
-            cachedBitmap = resize(cachedBitmap, cachedBitmap.getWidth() / downScale, cachedBitmap.getHeight() / downScale);
-            darkenBitMap(cachedBitmap);
-            cachedBitmap = BlurKit.getInstance().blur(cachedBitmap, blurRadius);
-            cache.addBitmapToBgMemoryCache(mProvidedBitmapResId, cachedBitmap);
+        if (cachedBitmap == null && mContextReference.get() != null) {
+            if(imageUrl != null){
+                try {
+                    Bitmap bitmap = Glide.with(mContextReference.get()).asBitmap().load(imageUrl).submit().get();
+                    cache.addBitmapToBgMemoryCache(imageUrl, processBitmap(bitmap));
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                cachedBitmap = BitmapFactory.decodeResource(mContextReference.get().getResources(), mProvidedBitmapResId, new BitmapFactoryOptions());
+                cache.addBitmapToBgMemoryCache(String.valueOf(mProvidedBitmapResId), processBitmap(cachedBitmap));
+            }
         }
         return cachedBitmap;
     }
 
+    private Bitmap processBitmap(Bitmap cachedBitmap){
+        cachedBitmap = resize(cachedBitmap, cachedBitmap.getWidth() / downScale, cachedBitmap.getHeight() / downScale);
+        darkenBitMap(cachedBitmap);
+        return BlurKit.getInstance().blur(cachedBitmap, blurRadius);
+    }
 
     public static Bitmap resize(Bitmap bitmap, int width, int height){
         Matrix m = new Matrix();

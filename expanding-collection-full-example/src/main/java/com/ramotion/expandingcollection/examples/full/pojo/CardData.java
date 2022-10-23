@@ -38,6 +38,11 @@ public class CardData implements ECCardData<Comment> {
         return headBackgroundResource;
     }
 
+    @Override
+    public String getBackgroundUrl() {
+        return null;
+    }
+
     public void setHeadBackgroundResource(Integer headBackgroundResource) {
         this.headBackgroundResource = headBackgroundResource;
     }

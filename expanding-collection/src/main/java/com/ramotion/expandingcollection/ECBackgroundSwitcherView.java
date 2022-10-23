@@ -125,9 +125,10 @@ public class ECBackgroundSwitcherView extends ImageSwitcher {
 
     public void cacheBackgroundAtPosition(ECPager pager, int position) {
         if (position >= 0 && position < pager.getAdapter().getCount()) {
+            String imageUrl = pager.getDataFromAdapterDataset(position).getBackgroundUrl();
             Integer mainBgImageDrawableResource = pager.getDataFromAdapterDataset(position).getMainBackgroundResource();
-            if (mainBgImageDrawableResource == null) return;
-            BitmapWorkerTask addBitmapToCacheTask = new BitmapWorkerTask(getResources(), mainBgImageDrawableResource, downScale, blurRadius);
+            if (mainBgImageDrawableResource == null && imageUrl == null) return;
+            BitmapWorkerTask addBitmapToCacheTask = new BitmapWorkerTask(getContext(), mainBgImageDrawableResource, imageUrl, downScale, blurRadius);
             addBitmapToCacheTask.execute(mainBgImageDrawableResource);
         }
     }
@@ -153,9 +154,10 @@ public class ECBackgroundSwitcherView extends ImageSwitcher {
             getInAnimation().cancel();
         }
         int position = pager.getCurrentPosition();
+        String imageUrl = pager.getDataFromAdapterDataset(position).getBackgroundUrl();
         Integer mainBgImageDrawableResource = pager.getDataFromAdapterDataset(position).getMainBackgroundResource();
-        if (mainBgImageDrawableResource == null) return;
-        mCurrentAnimationTask = new BitmapWorkerTask(getResources(), mainBgImageDrawableResource, downScale, blurRadius) {
+        if (mainBgImageDrawableResource == null && imageUrl == null) return;
+        mCurrentAnimationTask = new BitmapWorkerTask(getContext(), mainBgImageDrawableResource, imageUrl, downScale, blurRadius) {
             @Override
             protected void onPostExecute(Bitmap bitmap) {
                 super.onPostExecute(bitmap);

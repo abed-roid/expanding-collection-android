@@ -48,10 +48,6 @@ public class BackgroundBitmapCache {
         }
     }
 
-    public Bitmap getBitmapFromBgMemCache(Integer key) {
-        return getBitmapFromBgMemCache(String.valueOf(key));
-    }
-
     public Bitmap getBitmapFromBgMemCache(String key) {
         return mBackgroundsCache.get(key);
     }

@@ -8,10 +8,10 @@ group = 'com.ramotion.expandingcollection'
 version = '0.9.2'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 32
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 32
         versionCode 3
         versionName version
 

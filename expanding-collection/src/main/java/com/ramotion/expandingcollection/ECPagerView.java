@@ -138,8 +138,9 @@ public class ECPagerView extends FrameLayout implements ViewPager.OnPageChangeLi
 
             // change current image from cache or reinitialize it from resource
             BackgroundBitmapCache instance = BackgroundBitmapCache.getInstance();
+            String imageUrl = pager.getDataFromAdapterDataset(position).getBackgroundUrl();
             Integer mainBgImageDrawableResource = pager.getDataFromAdapterDataset(position).getMainBackgroundResource();
-            if (instance.getBitmapFromBgMemCache(mainBgImageDrawableResource) != null) {
+            if (instance.getBitmapFromBgMemCache(String.valueOf(imageUrl != null ? imageUrl : mainBgImageDrawableResource)) != null) {
                 attachedImageSwitcher.updateCurrentBackground(pager, direction);
             } else {
                 attachedImageSwitcher.updateCurrentBackgroundAsync(pager, direction);

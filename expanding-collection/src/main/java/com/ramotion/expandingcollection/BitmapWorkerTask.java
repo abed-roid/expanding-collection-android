@@ -47,7 +47,7 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
     @Override
     protected Bitmap doInBackground(Integer... params) {
         Integer key = params[0];
-        Bitmap cachedBitmap = cache.getBitmapFromBgMemCache(key);
+        Bitmap cachedBitmap = cache.getBitmapFromBgMemCache(String.valueOf(imageUrl != null ? imageUrl : key));
         if (cachedBitmap == null && mContextReference.get() != null) {
             if(imageUrl != null){
                 try {

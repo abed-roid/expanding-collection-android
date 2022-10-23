@@ -148,7 +148,7 @@ public class ECBackgroundSwitcherView extends ImageSwitcher {
         BackgroundBitmapCache instance = BackgroundBitmapCache.getInstance();
         String imageUrl = pager.getDataFromAdapterDataset(position).getBackgroundUrl();
         Integer mainBgImageDrawableResource = pager.getDataFromAdapterDataset(position).getMainBackgroundResource();
-        Bitmap cachedBitmap = instance.getBitmapFromBgMemCache(mainBgImageDrawableResource);
+        Bitmap cachedBitmap = instance.getBitmapFromBgMemCache(String.valueOf(imageUrl != null ? imageUrl : mainBgImageDrawableResource));
         if (cachedBitmap == null) {
             if (mainBgImageDrawableResource == null && imageUrl == null) return;
             if (imageUrl != null) {

@@ -43,11 +43,6 @@ public class MainActivity extends Activity {
                 // Create adapter for list inside a card and set adapter to card content
                 CommentArrayAdapter commentArrayAdapter = new CommentArrayAdapter(getApplicationContext(), cardData.getListItems());
                 list.setAdapter(commentArrayAdapter);
-                list.setDivider(getResources().getDrawable(R.drawable.list_divider));
-                list.setDividerHeight((int) pxFromDp(getApplicationContext(), 0.5f));
-                list.setSelector(R.color.transparent);
-                list.setBackgroundColor(Color.TRANSPARENT);
-                list.setCacheColorHint(Color.TRANSPARENT);
 
                 // Inflate main header layout and attach it to header root view
                 inflaterService.inflate(R.layout.simple_head, head);

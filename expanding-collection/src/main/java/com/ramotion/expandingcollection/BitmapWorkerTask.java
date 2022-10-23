@@ -51,8 +51,8 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
         if (cachedBitmap == null && mContextReference.get() != null) {
             if(imageUrl != null){
                 try {
-                    Bitmap bitmap = Glide.with(mContextReference.get()).asBitmap().load(imageUrl).submit().get();
-                    cache.addBitmapToBgMemoryCache(imageUrl, processBitmap(bitmap, downScale, blurRadius));
+                    cachedBitmap = Glide.with(mContextReference.get()).asBitmap().load(imageUrl).submit().get();
+                    cache.addBitmapToBgMemoryCache(imageUrl, processBitmap(cachedBitmap, downScale, blurRadius));
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }

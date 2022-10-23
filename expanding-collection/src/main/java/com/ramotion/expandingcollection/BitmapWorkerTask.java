@@ -52,19 +52,19 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
             if(imageUrl != null){
                 try {
                     Bitmap bitmap = Glide.with(mContextReference.get()).asBitmap().load(imageUrl).submit().get();
-                    cache.addBitmapToBgMemoryCache(imageUrl, processBitmap(bitmap));
+                    cache.addBitmapToBgMemoryCache(imageUrl, processBitmap(bitmap, downScale, blurRadius));
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }else {
                 cachedBitmap = BitmapFactory.decodeResource(mContextReference.get().getResources(), mProvidedBitmapResId, new BitmapFactoryOptions());
-                cache.addBitmapToBgMemoryCache(String.valueOf(mProvidedBitmapResId), processBitmap(cachedBitmap));
+                cache.addBitmapToBgMemoryCache(String.valueOf(mProvidedBitmapResId), processBitmap(cachedBitmap, downScale, blurRadius));
             }
         }
         return cachedBitmap;
     }
 
-    private Bitmap processBitmap(Bitmap cachedBitmap){
+    public static Bitmap processBitmap(Bitmap cachedBitmap, int downScale, int blurRadius){
         cachedBitmap = resize(cachedBitmap, cachedBitmap.getWidth() / downScale, cachedBitmap.getHeight() / downScale);
         darkenBitMap(cachedBitmap);
         return BlurKit.getInstance().blur(cachedBitmap, blurRadius);

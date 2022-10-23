@@ -18,6 +18,16 @@ import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.ViewSwitcher;
 
+import androidx.annotation.Nullable;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+
+import java.util.concurrent.ExecutionException;
+
 import io.alterac.blurkit.BlurKit;
 import ramotion.com.expandingcollection.R;
 
@@ -136,17 +146,35 @@ public class ECBackgroundSwitcherView extends ImageSwitcher {
     public void updateCurrentBackground(ECPager pager, final AnimationDirection direction) {
         int position = pager.getCurrentPosition();
         BackgroundBitmapCache instance = BackgroundBitmapCache.getInstance();
+        String imageUrl = pager.getDataFromAdapterDataset(position).getBackgroundUrl();
         Integer mainBgImageDrawableResource = pager.getDataFromAdapterDataset(position).getMainBackgroundResource();
         Bitmap cachedBitmap = instance.getBitmapFromBgMemCache(mainBgImageDrawableResource);
         if (cachedBitmap == null) {
-            if (mainBgImageDrawableResource == null) return;
-            cachedBitmap = BitmapFactory.decodeResource(getResources(), mainBgImageDrawableResource, new BitmapFactoryOptions());
-            cachedBitmap = BitmapWorkerTask.resize(cachedBitmap, cachedBitmap.getWidth() / downScale, cachedBitmap.getHeight() / downScale);
-            BitmapWorkerTask.darkenBitMap(cachedBitmap);
-            cachedBitmap = BlurKit.getInstance().blur(cachedBitmap, blurRadius);
-            instance.addBitmapToBgMemoryCache(mainBgImageDrawableResource, cachedBitmap);
-        }
-        setImageBitmapWithAnimation(cachedBitmap, direction);
+            if (mainBgImageDrawableResource == null && imageUrl == null) return;
+            if (imageUrl != null) {
+                Glide.with(getContext()).asBitmap().load(imageUrl).addListener(new RequestListener<Bitmap>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                        resource = BitmapWorkerTask.processBitmap(resource, downScale, blurRadius);
+                        instance.addBitmapToBgMemoryCache(imageUrl, resource);
+                        setImageBitmapWithAnimation(resource, direction);
+                        return true;
+                    }
+                }).submit();
+            }else {
+                cachedBitmap = BitmapFactory.decodeResource(getResources(), mainBgImageDrawableResource, new BitmapFactoryOptions());
+                cachedBitmap = BitmapWorkerTask.processBitmap(cachedBitmap, downScale, blurRadius);
+
+                instance.addBitmapToBgMemoryCache(mainBgImageDrawableResource, cachedBitmap);
+                setImageBitmapWithAnimation(cachedBitmap, direction);
+            }
+        }else
+            setImageBitmapWithAnimation(cachedBitmap, direction);
     }
 
     public void updateCurrentBackgroundAsync(ECPager pager, final AnimationDirection direction) {

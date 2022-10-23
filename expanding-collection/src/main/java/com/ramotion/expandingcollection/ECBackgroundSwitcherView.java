@@ -162,7 +162,8 @@ public class ECBackgroundSwitcherView extends ImageSwitcher {
                     public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
                         resource = BitmapWorkerTask.processBitmap(resource, downScale, blurRadius);
                         instance.addBitmapToBgMemoryCache(imageUrl, resource);
-                        setImageBitmapWithAnimation(resource, direction);
+                        Bitmap finalResource = resource;
+                        post(() -> setImageBitmapWithAnimation(finalResource, direction));
                         return true;
                     }
                 }).submit();

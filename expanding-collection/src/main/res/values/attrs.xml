@@ -4,5 +4,7 @@
         <attr name="cardWidth" format="dimension" />
         <attr name="cardHeight" format="dimension" />
         <attr name="cardHeaderHeightExpanded" format="dimension" />
+        <attr name="downScale" format="integer" />
+        <attr name="blurRadius" format="integer" />
     </declare-styleable>
 </resources>

@@ -1,6 +1,7 @@
 package com.ramotion.expandingcollection;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -17,22 +18,28 @@ import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.ViewSwitcher;
 
+import io.alterac.blurkit.BlurKit;
+import ramotion.com.expandingcollection.R;
+
 /**
  * Custom Image Switcher for display and change background images with some pretty animations.
  * Uses different drawing orders for animation purposes.
  */
 public class ECBackgroundSwitcherView extends ImageSwitcher {
+
     private final int[] REVERSE_ORDER = new int[]{1, 0};
     private final int[] NORMAL_ORDER = new int[]{0, 1};
 
     private boolean reverseDrawOrder;
 
-    private int bgImageGap;
+    public static int bgImageGap;
     private int bgImageWidth;
 
     private int alphaDuration = 400;
     private int movementDuration = 500;
     private int widthBackgroundImageGapPercent = 12;
+    private int downScale = 8;
+    private int blurRadius = 6;
 
     private Animation bgImageInLeftAnimation;
     private Animation bgImageOutLeftAnimation;
@@ -46,15 +53,10 @@ public class ECBackgroundSwitcherView extends ImageSwitcher {
 
     public ECBackgroundSwitcherView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        inflateAndInit(context);
+        inflateAndInit(context, attrs);
     }
 
-    public ECBackgroundSwitcherView(Context context) {
-        super(context);
-        inflateAndInit(context);
-    }
-
-    private void inflateAndInit(final Context context) {
+    private void inflateAndInit(final Context context, AttributeSet attrs) {
         setChildrenDrawingOrderEnabled(true);
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         bgImageGap = (displayMetrics.widthPixels / 100) * widthBackgroundImageGapPercent;
@@ -74,6 +76,14 @@ public class ECBackgroundSwitcherView extends ImageSwitcher {
         bgImageOutLeftAnimation = createBgImageOutAnimation(0, -bgImageGap, movementDuration);
         bgImageInRightAnimation = createBgImageInAnimation(-bgImageGap, 0, movementDuration, alphaDuration);
         bgImageOutRightAnimation = createBgImageOutAnimation(0, bgImageGap, movementDuration);
+
+        TypedArray array = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ExpandingCollection, 0, 0);
+        try {
+            downScale = array.getInt(R.styleable.ExpandingCollection_downScale, downScale);
+            blurRadius = array.getDimensionPixelSize(R.styleable.ExpandingCollection_blurRadius, blurRadius);
+        } finally {
+            array.recycle();
+        }
     }
 
 //    public ECBackgroundSwitcherView withAnimationSettings(int movementDuration, int alphaDuration) {
@@ -117,7 +127,7 @@ public class ECBackgroundSwitcherView extends ImageSwitcher {
         if (position >= 0 && position < pager.getAdapter().getCount()) {
             Integer mainBgImageDrawableResource = pager.getDataFromAdapterDataset(position).getMainBackgroundResource();
             if (mainBgImageDrawableResource == null) return;
-            BitmapWorkerTask addBitmapToCacheTask = new BitmapWorkerTask(getResources(), mainBgImageDrawableResource);
+            BitmapWorkerTask addBitmapToCacheTask = new BitmapWorkerTask(getResources(), mainBgImageDrawableResource, downScale, blurRadius);
             addBitmapToCacheTask.execute(mainBgImageDrawableResource);
         }
     }
@@ -130,6 +140,9 @@ public class ECBackgroundSwitcherView extends ImageSwitcher {
         if (cachedBitmap == null) {
             if (mainBgImageDrawableResource == null) return;
             cachedBitmap = BitmapFactory.decodeResource(getResources(), mainBgImageDrawableResource, new BitmapFactoryOptions());
+            cachedBitmap = BitmapWorkerTask.resize(cachedBitmap, cachedBitmap.getWidth() / downScale, cachedBitmap.getHeight() / downScale);
+            BitmapWorkerTask.darkenBitMap(cachedBitmap);
+            cachedBitmap = BlurKit.getInstance().blur(cachedBitmap, blurRadius);
             instance.addBitmapToBgMemoryCache(mainBgImageDrawableResource, cachedBitmap);
         }
         setImageBitmapWithAnimation(cachedBitmap, direction);
@@ -142,7 +155,7 @@ public class ECBackgroundSwitcherView extends ImageSwitcher {
         int position = pager.getCurrentPosition();
         Integer mainBgImageDrawableResource = pager.getDataFromAdapterDataset(position).getMainBackgroundResource();
         if (mainBgImageDrawableResource == null) return;
-        mCurrentAnimationTask = new BitmapWorkerTask(getResources(), mainBgImageDrawableResource) {
+        mCurrentAnimationTask = new BitmapWorkerTask(getResources(), mainBgImageDrawableResource, downScale, blurRadius) {
             @Override
             protected void onPostExecute(Bitmap bitmap) {
                 super.onPostExecute(bitmap);

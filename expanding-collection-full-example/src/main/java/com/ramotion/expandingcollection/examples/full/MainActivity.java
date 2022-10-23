@@ -21,6 +21,8 @@ import com.ramotion.expandingcollection.ECPagerViewAdapter;
 import com.ramotion.expandingcollection.examples.full.pojo.CardData;
 import com.ramotion.expandingcollection.examples.full.view.ItemsCountView;
 
+import io.alterac.blurkit.BlurKit;
+
 @SuppressLint("SetTextI18n")
 public class MainActivity extends Activity {
 
@@ -31,7 +33,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
+        BlurKit.init(this);
         // Create adapter for pager
         ECPagerViewAdapter adapter = new ECPagerViewAdapter(this, new ExampleDataset().getDataset()) {
             @Override
@@ -44,21 +46,15 @@ public class MainActivity extends Activity {
                 list.setDivider(getResources().getDrawable(R.drawable.list_divider));
                 list.setDividerHeight((int) pxFromDp(getApplicationContext(), 0.5f));
                 list.setSelector(R.color.transparent);
-                list.setBackgroundColor(Color.WHITE);
+                list.setBackgroundColor(Color.TRANSPARENT);
                 list.setCacheColorHint(Color.TRANSPARENT);
-
-                // Add gradient to root header view
-                View gradient = new View(getApplicationContext());
-                gradient.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.MATCH_PARENT));
-                gradient.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_head_gradient));
-                head.addView(gradient);
 
                 // Inflate main header layout and attach it to header root view
                 inflaterService.inflate(R.layout.simple_head, head);
 
                 // Set header data from data object
-                TextView title = (TextView) head.findViewById(R.id.title);
-                title.setText(cardData.getHeadTitle());
+                ImageView image = (ImageView) head.findViewById(R.id.image);
+                image.setImageResource(cardData.getHeadBackgroundResource());
                 ImageView avatar = (ImageView) head.findViewById(R.id.avatar);
                 avatar.setImageResource(cardData.getPersonPictureResource());
                 TextView name = (TextView) head.findViewById(R.id.name);
@@ -86,14 +82,6 @@ public class MainActivity extends Activity {
 
         ecPagerView.setPagerViewAdapter(adapter);
         ecPagerView.setBackgroundSwitcherView((ECBackgroundSwitcherView) findViewById(R.id.ec_bg_switcher_element));
-
-        final ItemsCountView itemsCountView = (ItemsCountView) findViewById(R.id.items_count_view);
-        ecPagerView.setOnCardSelectedListener(new ECPagerView.OnCardSelectedListener() {
-            @Override
-            public void cardSelected(int newPosition, int oldPosition, int totalElements) {
-                itemsCountView.update(newPosition, oldPosition, totalElements);
-            }
-        });
     }
 
     @Override

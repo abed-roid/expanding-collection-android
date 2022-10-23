@@ -69,9 +69,6 @@ public class ECPagerView extends FrameLayout implements ViewPager.OnPageChangeLi
         setClipChildren(false);
         setClipToPadding(false);
 
-        if (Build.VERSION.SDK_INT < 21)
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-
         pager = new ECPager(context);
 
         LayoutParams layoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);

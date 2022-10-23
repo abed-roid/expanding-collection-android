@@ -9,6 +9,7 @@ import android.widget.ListView;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import ramotion.com.expandingcollection.R;
 
@@ -40,11 +41,6 @@ public abstract class ECPagerViewAdapter extends PagerAdapter {
 
         headView.setHeight(pagerContainer.getCardHeight());
 
-        Integer drawableRes = dataset.get(position).getHeadBackgroundResource();
-        if (drawableRes != null) {
-            headView.setHeadImageBitmap(BitmapFactory.decodeResource(pagerContainer.getResources(), drawableRes, new BitmapFactoryOptions()));
-        }
-
         instantiateCard(inflaterService, headView, ecPagerCardContentList, dataset.get(position));
 
         pager.addView(pagerCard, pagerContainer.getCardWidth(), pagerContainer.getCardHeight());
@@ -53,6 +49,11 @@ public abstract class ECPagerViewAdapter extends PagerAdapter {
 
 
     public abstract void instantiateCard(LayoutInflater inflaterService, ViewGroup head, ListView list, ECCardData data);
+
+    @Override
+    public void finishUpdate(@NonNull ViewGroup container) {
+        super.finishUpdate(container);
+    }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {

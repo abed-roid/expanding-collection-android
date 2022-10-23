@@ -24,26 +24,10 @@ public class ECPagerCardHead extends FrameLayout {
 
     public ECPagerCardHead(Context context) {
         super(context);
-        init(context);
     }
 
     public ECPagerCardHead(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
-    }
-
-    public ECPagerCardHead(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(context);
-    }
-
-    public void init(Context context) {
-//        headBackgroundImageView = new TopCropImageView(context);
-        headBackgroundImageView = new ImageView(context);
-        headBackgroundImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.MATCH_PARENT);
-        headBackgroundImageView.setLayoutParams(params);
-        this.addView(headBackgroundImageView);
     }
 
     @Override
